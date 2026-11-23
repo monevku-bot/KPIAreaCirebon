@@ -657,8 +657,25 @@
 
   </main>
 
-  <footer id="app-footer" class="bg-white border-t border-slate-200 mt-8 py-4 text-center text-xs text-slate-500">
-    Dashboard Monev KPI MtD &amp; DtD • PT Pegadaian Kantor Area Cirebon (Konsolidasi + 15 Cabang) • 31 Okt → 20 Nov → 22 Nov 2026
+  <footer class="bg-white border-t border-slate-200 mt-8 py-4 px-4 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div id="app-footer" class="text-center sm:text-left">
+        Dashboard Monev KPI MtD &amp; DtD • PT Pegadaian Kantor Area Cirebon (Konsolidasi + 15 Cabang) • 31 Okt → 20 Nov → 22 Nov 2026
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-2.5 no-print">
+        <a id="hits-dashboard-link" href="https://hits.sh/monevku-bot.github.io/kpi-area-cirebon/" target="_blank" rel="noopener noreferrer" title="Klik untuk melihat grafik statistik kunjungan harian &amp; bulanan di Hits.sh" class="inline-flex items-center gap-1.5 hover:opacity-90 transition">
+          <img id="hits-badge-img" src="https://hits.sh/monevku-bot.github.io/kpi-area-cirebon.svg?style=flat-square&amp;label=Pengunjung&amp;color=059669&amp;labelColor=064e3b" alt="Total Pengunjung Dashboard" class="h-5 rounded" />
+          <span id="hits-offline-fallback" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-semibold">
+            <i data-lucide="eye" class="w-3 h-3"></i>
+            <span>Counter aktif saat online di GitHub Pages</span>
+          </span>
+        </a>
+        <span id="local-click-counter" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[11px] font-semibold" title="Total interaksi klik tab &amp; cabang di perangkat ini">
+          <i data-lucide="mouse-pointer-click" class="w-3 h-3 text-emerald-700"></i>
+          <span>Interaksi: <strong id="click-count-num">0</strong></span>
+        </span>
+      </div>
+    </div>
   </footer>
 
   <!-- Embedded Grounded KPI Data (updated automatically by Download index.html untuk GitHub) -->
@@ -2183,7 +2200,45 @@ Yuk, maksimalkan closing dan manfaatkan kesempatan cashback ini!`;
       renderAmngChart();
     });
 
+    // Traffic Counter (Hits.sh) & Local Interaction Counter
+    function initTrafficCounter() {
+      const img = document.getElementById('hits-badge-img');
+      const link = document.getElementById('hits-dashboard-link');
+      const fallback = document.getElementById('hits-offline-fallback');
+      if (img && link) {
+        const host = window.location.host;
+        const path = (window.location.pathname || '/').replace(/index\.html$/i, '').replace(/\/$/, '');
+        const isHosted = host && !host.includes('localhost') && !host.includes('127.0.0.1') && window.location.protocol.startsWith('http');
+        const slug = isHosted ? `${host}${path || '/kpi-area-cirebon'}` : 'monevku-bot.github.io/kpi-area-cirebon';
+        const cleanSlug = slug.replace(/^\/+|\/+$/g, '');
+        img.src = `https://hits.sh/${cleanSlug}.svg?style=flat-square&label=Pengunjung&color=059669&labelColor=064e3b`;
+        link.href = `https://hits.sh/${cleanSlug}/`;
+        img.addEventListener('error', () => {
+          img.classList.add('hidden');
+          if (fallback) fallback.classList.remove('hidden');
+        });
+      }
+
+      const clickEl = document.getElementById('click-count-num');
+      let clicks = 0;
+      try { clicks = parseInt(localStorage.getItem('kpi_cirebon_clicks') || '0', 10) || 0; } catch (e) {}
+      if (clickEl) clickEl.textContent = clicks.toLocaleString('id-ID');
+
+      const bumpClick = () => {
+        clicks += 1;
+        try { localStorage.setItem('kpi_cirebon_clicks', String(clicks)); } catch (e) {}
+        if (clickEl) clickEl.textContent = clicks.toLocaleString('id-ID');
+      };
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.tab-btn, .unit-pill-btn, .leaderboard-row, #btn-mode-mtd, #btn-mode-dtd, #btn-period-bln, #btn-period-thn')) {
+          bumpClick();
+        }
+      });
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
+      initTrafficCounter();
       updatePromoSimulator();
       renderAll();
     });
