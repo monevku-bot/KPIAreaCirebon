@@ -78,6 +78,10 @@
                 <i data-lucide="clock" class="w-3 h-3 text-emerald-300"></i>
                 <span>Log Kunjungan</span>
               </button>
+              <span id="badge-sync-status" class="hidden inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-400/20 text-emerald-100 border border-emerald-300/35">
+                <i data-lucide="cloud-check" class="w-3 h-3 text-emerald-300"></i>
+                <span id="sync-status-text">Auto-Sync Aktif</span>
+              </span>
             </div>
           </div>
         </div>
@@ -465,6 +469,14 @@
           </div>
         </div>
 
+        <div class="mb-4 flex items-center justify-between gap-3 rounded-xl bg-emerald-50/70 border border-emerald-200 px-4 py-2.5">
+          <label class="inline-flex items-center gap-2.5 cursor-pointer select-none text-xs font-semibold text-emerald-950">
+            <input id="chk-auto-shift-dtd" type="checkbox" checked class="w-4 h-4 rounded border-emerald-400 text-emerald-700 focus:ring-emerald-500" />
+            <span>Otomatis geser data <strong>Hari Ini</strong> sebelumnya menjadi <strong>Baseline DtD (Kemarin)</strong> saat upload file terbaru</span>
+          </label>
+          <span class="hidden sm:inline text-[11px] font-medium text-emerald-700">Cukup upload 1 file tiap hari</span>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <label for="excel-cur-input" class="flex flex-col items-center justify-center border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-emerald-50/40 hover:bg-emerald-50 rounded-2xl p-5 cursor-pointer transition text-center">
             <i data-lucide="upload-cloud" class="w-8 h-8 text-emerald-600 mb-2"></i>
@@ -491,10 +503,67 @@
           </label>
         </div>
 
+        <!-- Auto-Sync 1-Click GitHub Publisher -->
+        <div class="mt-6 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-white p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-emerald-800 text-amber-300 flex items-center justify-center shrink-0">
+                <i data-lucide="cloud-upload" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-extrabold text-slate-900">Auto-Sync &amp; Publish 1-Klik ke GitHub Pages (Tanpa Edit HTML)</h3>
+                <p class="text-xs text-slate-600">Simpan data &amp; tanggal terbaru ke <code class="px-1 py-0.5 rounded bg-slate-200/70 text-emerald-900 font-semibold">kpi_data.json</code> di repositori GitHub agar semua cabang otomatis melihat data terbaru.</p>
+              </div>
+            </div>
+            <button id="btn-toggle-gh-guide" type="button" class="text-xs font-semibold text-emerald-700 hover:underline self-start sm:self-center shrink-0">
+              Cara Buat Token (1 Menit) ▾
+            </button>
+          </div>
+
+          <div id="gh-token-guide" class="hidden rounded-xl bg-white border border-slate-200 p-3.5 text-xs text-slate-600 space-y-1.5">
+            <p class="font-bold text-slate-800">Langkah sekali saja membuat GitHub Token (100% Gratis):</p>
+            <ol class="list-decimal pl-4 space-y-1">
+              <li>Buka GitHub → klik foto profil pojok kanan atas → <strong>Settings</strong> → <strong>Developer settings</strong> (paling bawah kiri).</li>
+              <li>Pilih <strong>Personal access tokens</strong> → <strong>Fine-grained tokens</strong> → klik <strong>Generate new token</strong>.</li>
+              <li>Pada <em>Repository access</em> pilih <strong>Only select repositories</strong> (pilih repo dashboard Area Cirebon kamu).</li>
+              <li>Pada <em>Permissions → Repository permissions</em>, ubah <strong>Contents</strong> menjadi <strong>Read and write</strong> → klik <strong>Generate token</strong> lalu tempel di kolom bawah.</li>
+            </ol>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Username GitHub</label>
+              <input id="gh-owner" type="text" placeholder="mis. yanirawan" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Repositori</label>
+              <input id="gh-repo" type="text" placeholder="mis. kpi-area-cirebon" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Branch</label>
+              <input id="gh-branch" type="text" value="main" placeholder="main" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Personal Access Token (PAT)</label>
+              <input id="gh-token" type="password" placeholder="github_pat_..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div id="gh-publish-status" class="text-xs font-medium text-slate-500">
+              Token hanya disimpan di browser perangkat ini dan tidak ikut terunduh/terpublish.
+            </div>
+            <button id="btn-publish-github" type="button" class="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 shadow-sm transition">
+              <i data-lucide="rocket" class="w-4 h-4"></i>
+              <span>Publish ke GitHub (Auto-Sync)</span>
+            </button>
+          </div>
+        </div>
+
         <div class="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-slate-100">
           <div class="flex items-center gap-2 text-xs text-slate-500">
             <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
-            <span>Privasi terjaga: file Excel diproses 100% lokal di browser, tidak dikirim ke server luar.</span>
+            <span>Data Excel diproses lokal di browser. Upload <code class="px-1 bg-slate-100 rounded">index.html</code> cukup sekali di awal.</span>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <button id="btn-reset-data" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition">
@@ -503,7 +572,7 @@
             </button>
             <button id="btn-download-html" type="button" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white shadow transition">
               <i data-lucide="download" class="w-3.5 h-3.5 text-amber-300"></i>
-              <span>Download index.html untuk GitHub</span>
+              <span>Download index.html (Backup)</span>
             </button>
           </div>
         </div>
@@ -1942,13 +2011,18 @@
           }
           const count = Object.keys(parsed).length;
           if (!count) throw new Error('Format Excel tidak sesuai');
-          DB.data[slotKey] = parsed;
           const dt = extractDateFromFilename(file.name);
+          const autoShift = document.getElementById('chk-auto-shift-dtd');
+          if (slotKey === 'cur' && autoShift && autoShift.checked && dt.full !== DB.dates.curFull) {
+            DB.data.dtd = DB.data.cur;
+            DB.dates.dtd = DB.dates.cur;
+            DB.dates.dtdFull = DB.dates.curFull;
+          }
+          DB.data[slotKey] = parsed;
           DB.dates[slotKey] = dt.short;
           DB.dates[slotKey + 'Full'] = dt.full;
-          state.activeTab = 'overview';
           renderAll();
-          showToast(`${count} unit berhasil diperbarui untuk slot ${slotKey.toUpperCase()} (${dt.full})!`);
+          showToast(`${count} unit & tanggal (${dt.full}) diperbarui! Klik "Publish ke GitHub" untuk Auto-Sync.`);
         } catch (err) {
           showToast('Gagal membaca Excel: ' + err.message, 'error');
         }
@@ -1964,6 +2038,8 @@
       if (logModal) logModal.classList.add('hidden');
       const toast = cloneDoc.querySelector('#toast-container');
       if (toast) toast.innerHTML = '';
+      const ghTok = cloneDoc.querySelector('#gh-token');
+      if (ghTok) ghTok.setAttribute('value', '');
       const blob = new Blob(['<!DOCTYPE html>\n' + cloneDoc.outerHTML], { type: 'text/html;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -2218,9 +2294,148 @@
       showToast('Riwayat akses lokal dibersihkan.');
     });
 
+    // ---------- AUTO-SYNC GITHUB PAGES (LOAD kpi_data.json & 1-CLICK PUBLISH) ----------
+    const GH_CFG_KEY = 'kpi_area_cirebon_gh_cfg_v1';
+
+    function loadGhConfig() {
+      try {
+        const cfg = JSON.parse(safeGet(localStorage, GH_CFG_KEY) || '{}');
+        if (cfg.owner) document.getElementById('gh-owner').value = cfg.owner;
+        if (cfg.repo) document.getElementById('gh-repo').value = cfg.repo;
+        if (cfg.branch) document.getElementById('gh-branch').value = cfg.branch;
+        if (cfg.token) document.getElementById('gh-token').value = cfg.token;
+      } catch (_) {}
+      // Auto-detect owner & repo when hosted on *.github.io/<repo>/
+      try {
+        const host = window.location.hostname || '';
+        const pathParts = (window.location.pathname || '').split('/').filter(Boolean);
+        if (host.endsWith('.github.io')) {
+          const ownerEl = document.getElementById('gh-owner');
+          const repoEl = document.getElementById('gh-repo');
+          if (!ownerEl.value) ownerEl.value = host.replace('.github.io', '');
+          if (!repoEl.value && pathParts.length > 0) repoEl.value = pathParts[0];
+        }
+      } catch (_) {}
+    }
+
+    function saveGhConfig() {
+      const cfg = {
+        owner: document.getElementById('gh-owner').value.trim(),
+        repo: document.getElementById('gh-repo').value.trim(),
+        branch: document.getElementById('gh-branch').value.trim() || 'main',
+        token: document.getElementById('gh-token').value.trim(),
+      };
+      safeSet(localStorage, GH_CFG_KEY, JSON.stringify(cfg));
+      return cfg;
+    }
+
+    function utf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let bin = '';
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+      }
+      return btoa(bin);
+    }
+
+    async function publishToGitHub() {
+      const cfg = saveGhConfig();
+      const statusEl = document.getElementById('gh-publish-status');
+      const btn = document.getElementById('btn-publish-github');
+      if (!cfg.owner || !cfg.repo || !cfg.token) {
+        statusEl.innerHTML = '<span class="text-rose-600 font-bold">Lengkapi Username GitHub, Nama Repositori, dan Token terlebih dahulu.</span>';
+        showToast('Lengkapi data GitHub & Token dulu ya!', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.classList.add('opacity-60');
+      statusEl.innerHTML = '<span class="text-emerald-700 font-semibold">Mengirim data & tanggal terbaru ke GitHub...</span>';
+
+      const apiUrl = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/kpi_data.json`;
+      const headers = {
+        'Authorization': `Bearer ${cfg.token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      };
+
+      try {
+        let sha = null;
+        const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(cfg.branch)}`, { headers, cache: 'no-store' });
+        if (getRes.ok) {
+          const meta = await getRes.json();
+          sha = meta.sha || null;
+        } else if (getRes.status !== 404) {
+          throw new Error(`Gagal cek repo (HTTP ${getRes.status}). Periksa nama repo & token.`);
+        }
+
+        const payload = {
+          updatedAt: new Date().toISOString(),
+          dates: DB.dates,
+          data: DB.data
+        };
+        const body = {
+          message: `Update KPI Area Cirebon (${DB.dates.curFull})`,
+          content: utf8ToBase64(JSON.stringify(payload)),
+          branch: cfg.branch
+        };
+        if (sha) body.sha = sha;
+
+        const putRes = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(body) });
+        if (!putRes.ok) {
+          const errJson = await putRes.json().catch(() => ({}));
+          throw new Error(errJson.message || `HTTP ${putRes.status}`);
+        }
+
+        statusEl.innerHTML = `<span class="text-emerald-700 font-bold">✓ Berhasil dipublish (${DB.dates.curFull})! Semua pengunjung GitHub Pages otomatis mendapat data terbaru dalam ~30 detik.</span>`;
+        const syncBadge = document.getElementById('badge-sync-status');
+        if (syncBadge) {
+          syncBadge.classList.remove('hidden');
+          document.getElementById('sync-status-text').textContent = `Live Sync: ${DB.dates.cur}`;
+        }
+        showToast(`Data ${DB.dates.curFull} berhasil dipublish ke GitHub!`);
+      } catch (err) {
+        statusEl.innerHTML = `<span class="text-rose-600 font-bold">✗ Gagal publish: ${err.message}</span>`;
+        showToast('Gagal publish ke GitHub: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-60');
+      }
+    }
+
+    async function autoLoadLiveJson() {
+      if (window.location.protocol === 'file:') return;
+      try {
+        const res = await fetch(`./kpi_data.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const live = await res.json();
+        if (live && live.dates && live.data && live.data.cur) {
+          DB.dates = live.dates;
+          DB.data = live.data;
+          renderAll();
+          const syncBadge = document.getElementById('badge-sync-status');
+          if (syncBadge) {
+            syncBadge.classList.remove('hidden');
+            document.getElementById('sync-status-text').textContent = `Live Sync: ${DB.dates.cur}`;
+          }
+        }
+      } catch (_) {}
+    }
+
+    document.getElementById('btn-toggle-gh-guide').addEventListener('click', () => {
+      document.getElementById('gh-token-guide').classList.toggle('hidden');
+    });
+    document.getElementById('btn-publish-github').addEventListener('click', publishToGitHub);
+    ['gh-owner', 'gh-repo', 'gh-branch', 'gh-token'].forEach(id => {
+      document.getElementById(id).addEventListener('change', saveGhConfig);
+    });
+
+    loadGhConfig();
     setupQuickJump();
     renderAll();
     initVisitorCounters();
+    autoLoadLiveJson();
   })();
   </script>
 </body>
